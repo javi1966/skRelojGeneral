@@ -28,6 +28,7 @@ const byte DIGIT_COUNT = 4;
 int str4094 = 6;
 int clk4094 = 7;
 int data4094 = 8;
+int ALTAVOZ  = 9;
 
 uint8_t dato[] = {0,};
 byte Digitos[4];
@@ -51,7 +52,7 @@ boolean bSetAlarma = false;
 boolean bAlarmaONOFF = false;
 boolean bUpdate = false;
 boolean bVisu = true;
-
+boolean b500ms =false;
 
 float temperatura = 0.0;
 boolean bLeeT = false;
@@ -124,22 +125,36 @@ void VisuHoraProg(byte Modo) {
   switch (Modo) {
 
     case 0: DIGITO1 = numToDigit((bin2bcd(hora) & 0xF0) >> 4);
-            DIGITO2 = numToDigit(bin2bcd(hora) & 0x0F);
-            DIGITO3 = 0;
-            DIGITO4 = 0;
+      DIGITO2 = numToDigit(bin2bcd(hora) & 0x0F);
+      DIGITO3 = 0;
+      DIGITO4 = 0;
       break;
     case 1:
       DIGITO1 = numToDigit((bin2bcd(horaA1) & 0xF0) >> 4);
       DIGITO2 = numToDigit(bin2bcd(horaA1) & 0x0F);
-      DIGITO3 = B10110111;  //letra A
-      DIGITO4 = B00000110;  //1
+      if (b500ms) {
+        DIGITO3 = B10110111;  //letra A
+        DIGITO4 = B00000110;  //1
+      }
+      else
+      {
+        DIGITO3 = 0;  //letra A
+        DIGITO4 = 0;  //1
+      }
       break;
 
     case 2:
       DIGITO1 = numToDigit((bin2bcd(horaA2) & 0xF0) >> 4);
       DIGITO2 = numToDigit(bin2bcd(horaA2) & 0x0F);
-      DIGITO3 = B10110111;  //letra A
-      DIGITO4 = B01011011;  //2
+      if (b500ms) {
+        DIGITO3 = B10110111;  //letra A
+        DIGITO4 = B01011011;  //2
+      }
+      else
+      {
+        DIGITO3 = 0;  //letra A
+        DIGITO4 = 0;  //2
+      }
       break;
 
     default: break;
@@ -165,17 +180,30 @@ void VisuMinProg(byte bModo) {
       break;
 
     case 1:
+      if (b500ms) {
+        DIGITO1 = B01110111;  //letra A
+        DIGITO2 = B00000110;   //1
+      } else
+      {
+        DIGITO1 = 0;  //letra A
+        DIGITO2 = 0;
 
-      DIGITO1 = B01110111;  //letra A
-      DIGITO2 = B00000110;  //1
+      }
       DIGITO3 = numToDigitInv((bin2bcd(minA1) & 0xF0) >> 4);
       DIGITO4 = numToDigit(bin2bcd(minA1) & 0x0F);;
       break;
 
     case 2:
+      if (b500ms) {
+        DIGITO1 = B01110111;  //letra A
+        DIGITO2 = B01011011;  //2
+      }
+      else
+      {
+        DIGITO1 = 0;  //letra A
+        DIGITO2 = 0;  //2
 
-      DIGITO1 = B01110111;  //letra A
-      DIGITO2 = B01011011;  //2
+      }
       DIGITO3 = numToDigitInv((bin2bcd(minA2) & 0xF0) >> 4);
       DIGITO4 = numToDigit(bin2bcd(minA2) & 0x0F);;
       break;
@@ -206,6 +234,19 @@ void visuTemperatura(float temperatura)
   }
 
 }
+//*********************************************************************************
+void aviso() {
+  for (int i = 0; i < 15; i++) { //run loop for all values of i 0 to __
+    tone(ALTAVOZ, 800); //play tones in order from the frequency array
+    delay(200);   //play all above tones for the corresponding duration in the duration array
+    tone(ALTAVOZ, 1000);
+    delay(200);   //play all above tones for the corresponding duration in the duration array
+    tone(ALTAVOZ, 1500);
+    delay(200);   //play all above tones for the corresponding duration in the duration array
+    noTone(ALTAVOZ);   //turn off speaker for 30ms before looping back to the next note
+    delay(10);
+  }
+}
 
 
 //***************************************************************************
@@ -222,8 +263,9 @@ void setup() {
   pinMode(SETMENOS, INPUT);
   pinMode(SETALARMA, INPUT);
   pinMode(led, OUTPUT);
+  pinMode(ALTAVOZ, OUTPUT);
 
-
+  digitalWrite(ALTAVOZ, LOW);
   Timer1.initialize(400000);//timing for 500ms
   Timer1.attachInterrupt(TimingISR);//declare the interrupt serve routine:TimingIS
 
@@ -241,23 +283,24 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-  if (Reloj.checkIfAlarm(1) )
+  if (Reloj.checkIfAlarm(1) ) {
     Serial.println("!!!!!!!!!!Alarma 1 !!!!!!!!!!!");
+    aviso();
+  }
 
-  if ( Reloj.checkIfAlarm(2))
+
+  if ( Reloj.checkIfAlarm(2)){
     Serial.println("!!!!!!!!!!Alarma 2 !!!!!!!!!!!");
-    
+     aviso();
+  }  
+
   if (bUpdate)
   {
     hora = Reloj.getHour(h12, PM);
     minu = Reloj.getMinute();
 
-
     bUpdate = false;
   }
-
-
-
 
   if (digitalRead(SETMODO) == LOW) {
 
@@ -364,6 +407,7 @@ void loop() {
       Serial.print(Reloj.checkAlarmEnabled(1));
       Serial.println(Reloj.checkAlarmEnabled(2));
       digitalWrite(led, LOW);
+      noTone(ALTAVOZ);
     }
 
     delay(100);
@@ -406,6 +450,8 @@ void TimingISR()
   static byte cntTemp = 0;
   static byte cntTemperatura = 0;
   static byte cntLeeTemperatura = 0;
+
+  b500ms = !b500ms;
 
   if (++cntTemp > 2)  //1 segundo
   {
