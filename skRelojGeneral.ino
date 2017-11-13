@@ -52,7 +52,7 @@ boolean bSetAlarma = false;
 boolean bAlarmaONOFF = false;
 boolean bUpdate = false;
 boolean bVisu = true;
-boolean b500ms =false;
+boolean b500ms = false;
 
 float temperatura = 0.0;
 boolean bLeeT = false;
@@ -289,10 +289,10 @@ void loop() {
   }
 
 
-  if ( Reloj.checkIfAlarm(2)){
+  if ( Reloj.checkIfAlarm(2)) {
     Serial.println("!!!!!!!!!!Alarma 2 !!!!!!!!!!!");
-     aviso();
-  }  
+    aviso();
+  }
 
   if (bUpdate)
   {
@@ -380,37 +380,41 @@ void loop() {
 
   if (digitalRead(SETALARMA) == LOW) {
 
-    bSetAlarma = !bSetAlarma;
+    delay(25); //debounce
 
-    if (bSetAlarma) {
-      Serial.print("Alarma 1: Hora: ");
-      Serial.print(horaA1);
-      Serial.println(minA1);
-      Serial.print("Alarma 2: Hora: ");
-      Serial.print(horaA2);
-      Serial.println(minA2);
-      Reloj.setA1Time(0, horaA1, minA1, 0, 0b1000, false, false, false);
-      Reloj.setA2Time(0, horaA2, minA2, 0b100, false, false, false);
-      Reloj.turnOnAlarm(1);
-      Reloj.turnOnAlarm(2);
+    if (digitalRead(SETALARMA) == LOW) {
+      
+      bSetAlarma = !bSetAlarma;
 
-      Serial.print("Alarma Enabled ");
-      Serial.print(Reloj.checkAlarmEnabled(1));
-      Serial.println(Reloj.checkAlarmEnabled(2));
-      digitalWrite(led, HIGH);
+      if (bSetAlarma) {
+        Serial.print("Alarma 1: Hora: ");
+        Serial.print(horaA1);
+        Serial.println(minA1);
+        Serial.print("Alarma 2: Hora: ");
+        Serial.print(horaA2);
+        Serial.println(minA2);
+        Reloj.setA1Time(0, horaA1, minA1, 0, 0b1000, false, false, false);
+        Reloj.setA2Time(0, horaA2, minA2, 0b100, false, false, false);
+        Reloj.turnOnAlarm(1);
+        Reloj.turnOnAlarm(2);
+
+        Serial.print("Alarma Enabled ");
+        Serial.print(Reloj.checkAlarmEnabled(1));
+        Serial.println(Reloj.checkAlarmEnabled(2));
+        digitalWrite(led, HIGH);
+      }
+      else {
+        Serial.println("Alarma off");
+        Reloj.turnOffAlarm(1);
+        Reloj.turnOffAlarm(2);
+        Serial.print("Alarma Enabled ");
+        Serial.print(Reloj.checkAlarmEnabled(1));
+        Serial.println(Reloj.checkAlarmEnabled(2));
+        digitalWrite(led, LOW);
+        noTone(ALTAVOZ);
+      }
+
     }
-    else {
-      Serial.println("Alarma off");
-      Reloj.turnOffAlarm(1);
-      Reloj.turnOffAlarm(2);
-      Serial.print("Alarma Enabled ");
-      Serial.print(Reloj.checkAlarmEnabled(1));
-      Serial.println(Reloj.checkAlarmEnabled(2));
-      digitalWrite(led, LOW);
-      noTone(ALTAVOZ);
-    }
-
-    delay(100);
   }
 
   switch (modo)
