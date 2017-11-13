@@ -304,11 +304,13 @@ void loop() {
 
   if (digitalRead(SETMODO) == LOW) {
 
-    if (++modo > 6 )
-      modo = 0;
-    delay(100);
+    delay(25); //debounce
+    if (digitalRead(SETMODO) == LOW) {
+      if (++modo > 6 )
+        modo = 0;
+      delay(100);
+    }
   }
-
   if (digitalRead(SETMAS) == LOW) {
 
     switch (modo)
@@ -383,7 +385,7 @@ void loop() {
     delay(25); //debounce
 
     if (digitalRead(SETALARMA) == LOW) {
-      
+
       bSetAlarma = !bSetAlarma;
 
       if (bSetAlarma) {
