@@ -266,6 +266,7 @@ void setup() {
   pinMode(ALTAVOZ, OUTPUT);
 
   digitalWrite(ALTAVOZ, LOW);
+  digitalWrite(led, LOW);
   Timer1.initialize(400000);//timing for 500ms
   Timer1.attachInterrupt(TimingISR);//declare the interrupt serve routine:TimingIS
 
@@ -275,7 +276,18 @@ void setup() {
 
   Reloj.getA1Time (diaA1, horaA1, minA1, secA1, bitsA1, dyA1, a12h, a1pm);
   Reloj.getA2Time (diaA2, horaA2, minA2,  bitsA1, dyA2, a12h, a1pm);
-  digitalWrite(led, LOW);
+
+  if (Reloj.checkAlarmEnabled(1)) {
+
+    Reloj.turnOnAlarm(1);
+    Reloj.turnOnAlarm(2);
+
+    Serial.print("Alarma Enabled ");
+    Serial.print(Reloj.checkAlarmEnabled(1));
+    Serial.println(Reloj.checkAlarmEnabled(2));
+    digitalWrite(led, HIGH);
+  }
+
 }
 //***************************************************************************
 
