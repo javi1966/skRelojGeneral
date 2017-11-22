@@ -116,6 +116,8 @@ void visuHora()
     shiftOut(data4094, clk4094, MSBFIRST, Digitos[i]); //Send the data
     digitalWrite(str4094, LOW); // Pull latch HIGH to stop sending data
   }
+
+  
 }
 //****************************************************************************
 void VisuHoraProg(byte Modo) {
@@ -277,6 +279,8 @@ void setup() {
   Reloj.getA1Time (diaA1, horaA1, minA1, secA1, bitsA1, dyA1, a12h, a1pm);
   Reloj.getA2Time (diaA2, horaA2, minA2,  bitsA1, dyA2, a12h, a1pm);
 
+  
+
   if (Reloj.checkAlarmEnabled(1)) {
 
     Reloj.turnOnAlarm(1);
@@ -295,7 +299,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-  if (Reloj.checkIfAlarm(1) ) {
+  if (Reloj.checkIfAlarm(1) && Reloj.checkAlarmEnabled(1)) {
     Serial.println("!!!!!!!!!!Alarma 1 !!!!!!!!!!!");
     aviso();
   }
@@ -316,7 +320,7 @@ void loop() {
 
   if (digitalRead(SETMODO) == LOW) {
 
-    delay(25); //debounce
+    delay(15); //debounce
     if (digitalRead(SETMODO) == LOW) {
       if (++modo > 6 )
         modo = 0;
@@ -456,7 +460,8 @@ void loop() {
   }
 
 
-  delay(200);
+   delay(400);
+  
 
 }
 
